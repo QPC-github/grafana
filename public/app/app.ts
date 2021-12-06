@@ -65,6 +65,7 @@ import { DatasourceSrv } from './features/plugins/datasource_srv';
 import { AngularApp } from './angular';
 import { ModalManager } from './core/services/ModalManager';
 import { initWindowRuntime } from './features/runtime/init';
+import { ShopifyAnalyticsBackend } from './core/services/echo/backends/analytics/ShopifyTraceAnalytics';
 
 // add move to lodash for backward compatabilty with plugins
 // @ts-ignore
@@ -223,6 +224,8 @@ function initEchoSrv() {
       })
     );
   }
+
+  registerEchoBackend(new ShopifyAnalyticsBackend({}));
 }
 
 function addClassIfNoOverlayScrollbar() {
