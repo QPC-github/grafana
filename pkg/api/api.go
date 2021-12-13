@@ -136,6 +136,8 @@ func (hs *HTTPServer) registerRoutes() {
 	// expose plugin file system assets
 	r.Get("/public/plugins/:pluginId/*", hs.getPluginAssets)
 
+	r.Get("/api/plugins/:pluginId/metrics", routing.Wrap(hs.CollectPluginMetrics))
+
 	// authed api
 	r.Group("/api", func(apiRoute routing.RouteRegister) {
 		// user (signed in)
@@ -294,7 +296,6 @@ func (hs *HTTPServer) registerRoutes() {
 		apiRoute.Group("/plugins", func(pluginRoute routing.RouteRegister) {
 			pluginRoute.Get("/:pluginId/dashboards/", routing.Wrap(hs.GetPluginDashboards))
 			pluginRoute.Post("/:pluginId/settings", routing.Wrap(hs.UpdatePluginSetting))
-			pluginRoute.Get("/:pluginId/metrics", routing.Wrap(hs.CollectPluginMetrics))
 		}, reqOrgAdmin)
 
 		apiRoute.Get("/frontend/settings/", hs.GetFrontendSettings)

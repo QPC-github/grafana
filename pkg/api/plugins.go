@@ -272,6 +272,10 @@ func (hs *HTTPServer) CollectPluginMetrics(c *models.ReqContext) response.Respon
 		return response.Error(404, "Plugin not found", nil)
 	}
 
+	if hs.metricsEndpointBasicAuthEnabled() && !BasicAuthenticatedRequest(c.Req, hs.Cfg.MetricsEndpointBasicAuthUsername, hs.Cfg.MetricsEndpointBasicAuthPassword) {
+		return response.Error(401, "Not Authorized", nil)
+	}
+
 	resp, err := hs.pluginClient.CollectMetrics(c.Req.Context(), plugin.ID)
 	if err != nil {
 		return translatePluginRequestErrorToAPIError(err)
