@@ -15,13 +15,13 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import cx from 'classnames';
+import IoLink from 'react-icons/lib/io/link';
 
 import AccordianKeyValues from './AccordianKeyValues';
 import AccordianLogs from './AccordianLogs';
 import AccordianText from './AccordianText';
 import DetailState from './DetailState';
 import { formatDuration } from '../utils';
-import CopyIcon from '../../common/CopyIcon';
 import LabeledList from '../../common/LabeledList';
 
 import { SpanLinkFunc, TNil } from '../../types';
@@ -29,8 +29,18 @@ import { TraceKeyValuePair, TraceLink, TraceLog, TraceSpan } from '../../types/t
 import AccordianReferences from './AccordianReferences';
 import { autoColor, createStyle, Theme, useTheme } from '../../Theme';
 import { UIDivider } from '../../uiElementsContext';
-import { ubFlex, ubFlexAuto, ubItemsCenter, ubM0, ubMb1, ubMy1, ubTxRightAlign } from '../../uberUtilityStyles';
+import {
+  uAlignIcon,
+  ubFlex,
+  ubFlexAuto,
+  ubItemsCenter,
+  ubM0,
+  ubMb1,
+  ubMy1,
+  ubTxRightAlign,
+} from '../../uberUtilityStyles';
 import { DataLinkButton, TextArea } from '@grafana/ui';
+import { LinkModel } from '@grafana/data';
 
 const getStyles = createStyle((theme: Theme) => {
   return {
@@ -99,6 +109,9 @@ const getStyles = createStyle((theme: Theme) => {
       word-break: break-all;
       white-space: pre;
     `,
+    LinkIcon: css`
+      font-size: 1.5em;
+    `,
   };
 });
 
@@ -116,6 +129,8 @@ type SpanDetailProps = {
   referencesToggle: (spanID: string) => void;
   focusSpan: (uiFind: string) => void;
   createSpanLink?: SpanLinkFunc;
+  focusedSpanId?: string;
+  createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;
 };
 
 export default function SpanDetail(props: SpanDetailProps) {
@@ -133,6 +148,7 @@ export default function SpanDetail(props: SpanDetailProps) {
     referencesToggle,
     focusSpan,
     createSpanLink,
+    createFocusSpanLink,
   } = props;
   const {
     isTagsOpen,
@@ -147,6 +163,7 @@ export default function SpanDetail(props: SpanDetailProps) {
     process,
     duration,
     relativeStartTime,
+    traceID,
     spanID,
     logs,
     tags,
@@ -171,9 +188,9 @@ export default function SpanDetail(props: SpanDetailProps) {
       value: formatDuration(relativeStartTime),
     },
   ];
-  const deepLinkCopyText = `${window.location.origin}${window.location.pathname}?uiFind=${spanID}`;
   const styles = getStyles(useTheme());
   const link = createSpanLink?.(span);
+  const focusSpanLink = createFocusSpanLink(traceID, spanID);
 
   return (
     <div>
@@ -263,13 +280,25 @@ export default function SpanDetail(props: SpanDetailProps) {
           />
         )}
         <small className={styles.debugInfo}>
+          <a
+            {...focusSpanLink}
+            onClick={(e) => {
+              // click handling logic copied from react router:
+              // https://github.com/remix-run/react-router/blob/997b4d67e506d39ac6571cb369d6d2d6b3dda557/packages/react-router-dom/index.tsx#L392-L394s
+              if (
+                focusSpanLink.onClick &&
+                e.button === 0 && // Ignore everything but left clicks
+                (!e.currentTarget.target || e.currentTarget.target === '_self') && // Let browser handle "target=_blank" etc.
+                !(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) // Ignore clicks with modifier keys
+              ) {
+                e.preventDefault();
+                focusSpanLink.onClick(e);
+              }
+            }}
+          >
+            <IoLink className={cx(uAlignIcon, styles.LinkIcon)}></IoLink>
+          </a>
           <span className={styles.debugLabel} data-label="SpanID:" /> {spanID}
-          <CopyIcon
-            copyText={deepLinkCopyText}
-            icon="link"
-            placement="topRight"
-            tooltipTitle="Copy deep link to this span"
-          />
         </small>
       </div>
     </div>

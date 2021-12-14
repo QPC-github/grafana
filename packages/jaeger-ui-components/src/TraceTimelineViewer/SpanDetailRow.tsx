@@ -23,6 +23,7 @@ import { autoColor, createStyle, Theme, withTheme } from '../Theme';
 
 import { TraceLog, TraceSpan, TraceKeyValuePair, TraceLink } from '../types/trace';
 import { SpanLinkFunc } from '../types';
+import { LinkModel } from '@grafana/data';
 
 const getStyles = createStyle((theme: Theme) => {
   return {
@@ -87,6 +88,8 @@ type SpanDetailRowProps = {
   removeHoverIndentGuideId: (spanID: string) => void;
   theme: Theme;
   createSpanLink?: SpanLinkFunc;
+  focusedSpanId?: string;
+  createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;
 };
 
 export class UnthemedSpanDetailRow extends React.PureComponent<SpanDetailRowProps> {
@@ -119,6 +122,8 @@ export class UnthemedSpanDetailRow extends React.PureComponent<SpanDetailRowProp
       removeHoverIndentGuideId,
       theme,
       createSpanLink,
+      focusedSpanId,
+      createFocusSpanLink,
     } = this.props;
     const styles = getStyles(theme);
     return (
@@ -158,6 +163,8 @@ export class UnthemedSpanDetailRow extends React.PureComponent<SpanDetailRowProp
               traceStartTime={traceStartTime}
               focusSpan={focusSpan}
               createSpanLink={createSpanLink}
+              focusedSpanId={focusedSpanId}
+              createFocusSpanLink={createFocusSpanLink}
             />
           </div>
         </TimelineRow.Cell>
