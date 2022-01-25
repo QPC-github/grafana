@@ -25,7 +25,7 @@ import { formatDuration } from '../utils';
 import LabeledList from '../../common/LabeledList';
 
 import { SpanLinkFunc, TNil } from '../../types';
-import { TraceKeyValuePair, TraceLink, TraceLog, TraceSpan } from '../../types/trace';
+import { TraceKeyValuePair, TraceLink, TraceLog, TraceSpan, TraceSpanReference } from '../../types/trace';
 import AccordianReferences from './AccordianReferences';
 import { autoColor, createStyle, Theme, useTheme } from '../../Theme';
 import { UIDivider } from '../../uiElementsContext';
@@ -126,6 +126,7 @@ type SpanDetailProps = {
   traceStartTime: number;
   warningsToggle: (spanID: string) => void;
   stackTracesToggle: (spanID: string) => void;
+  referenceItemToggle: (spanID: string, reference: TraceSpanReference) => void;
   referencesToggle: (spanID: string) => void;
   focusSpan: (uiFind: string) => void;
   createSpanLink?: SpanLinkFunc;
@@ -146,6 +147,7 @@ export default function SpanDetail(props: SpanDetailProps) {
     warningsToggle,
     stackTracesToggle,
     referencesToggle,
+    referenceItemToggle,
     focusSpan,
     createSpanLink,
     createFocusSpanLink,
@@ -155,7 +157,7 @@ export default function SpanDetail(props: SpanDetailProps) {
     isProcessOpen,
     logs: logsState,
     isWarningsOpen,
-    isReferencesOpen,
+    references: referencesState,
     isStackTracesOpen,
   } = detailState;
   const {
@@ -274,8 +276,10 @@ export default function SpanDetail(props: SpanDetailProps) {
         {references && references.length > 0 && (references.length > 1 || references[0].refType !== 'CHILD_OF') && (
           <AccordianReferences
             data={references}
-            isOpen={isReferencesOpen}
+            isOpen={referencesState.isOpen}
+            openedItems={referencesState.openedItems}
             onToggle={() => referencesToggle(spanID)}
+            onItemToggle={(reference) => referenceItemToggle(spanID, reference)}
             focusSpan={focusSpan}
           />
         )}
